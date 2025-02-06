@@ -2,6 +2,9 @@
 
 LiveView.sh is a simple script that allows users to view Network Blocks, Node Block, Peer count, and hardware resources.
 
+<img width="514" alt="Screenshot 2025-02-06 at 3 45 38 PM" src="https://github.com/user-attachments/assets/9098174e-9526-46c8-9f74-7f1f002f443b" />
+
+
 ## Installation & Usage
 
 To download and run LiveView.sh, follow these steps:
