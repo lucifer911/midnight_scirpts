@@ -1,109 +1,148 @@
 #!/bin/bash
 
-# Midnight Node Container Name
+# USER VARIABLES
 CONTAINER_NAME="midnight-node-docker-midnight-node-testnet-1"
+MIDNIGHT_PORT="<PORT>"
+RPC_URL="http://127.0.0.1:<PORT>" ## enter localhost or 127.0.0.1 with appropriate port
+METRICS_URL="http://127.0.0.1:<PORT>/metrics" ## enter localhost or 127.0.0.1 with appropriate port
 
 # Color codes
 GREEN="\033[1;32m"
+DARK_GREEN="\033[0;32m"  # Standard Dark Green
 YELLOW="\033[1;33m"
 BLUE="\033[1;34m"
 RED="\033[1;31m"
 CYAN="\033[1;36m"
+OLIVE="\033[38;5;58m"
+WHITE="\033[1;37m"
+GREY="\033[1;30m"  # Light Grey
+DARK_GREY="\033[0;37m"  # Dark Grey
 RESET="\033[0m"
 
-# Function to fetch data
-fetch_data() {
-    # Get uptime
-    UPTIME=$(uptime -p)
 
-    # Get Midnight Node Version
-    NODE_VERSION="Midnight Testnet v1.0"
+# ==================================================================
+# SCRIPT
+# ==================================================================
 
-    # Get Syncing Info from Logs
-    SYNC_LOG=$(docker logs --tail 50 "$CONTAINER_NAME" 2>&1 | grep "Syncing" | tail -n 1)
-
-    # Extract values from log
-    NETWORK_LATEST_BLOCK=$(echo "$SYNC_LOG" | grep -oP 'target=#\K\d+')
-    MY_BEST_BLOCK=$(echo "$SYNC_LOG" | grep -oP 'best: #\K\d+')
-    MY_FINALIZED_BLOCK=$(echo "$SYNC_LOG" | grep -oP 'finalized #\K\d+')
-
-    # Get Peers Info
-    PEERS_JSON=$(docker exec -it "$CONTAINER_NAME" curl -s -X POST \
-        --data '{"jsonrpc":"2.0","method":"system_peers","params":[],"id":1}' \
-        -H "Content-Type: application/json" http://localhost:9944)
-
-    TOTAL_PEERS=$(echo "$PEERS_JSON" | jq '.result | length')
-
-    # Get CPU and Memory Usage
-    CPU_USAGE=$(top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4}')
-    MEM_USAGE=$(free -m | awk 'NR==2{printf "%.2f MB\n", $3}')
-
-    # Get Disk Usage
-    DISK_USAGE=$(df -h / | awk 'NR==2 {print $5}')
-
-    # Count Blocks Produced by My Node
-    BLOCKS_PRODUCED=$(docker logs "$CONTAINER_NAME" 2>&1 | grep -c "Produced block")
-
-    # Get Sync Percentage
-    if [[ "$NETWORK_LATEST_BLOCK" -gt 0 && "$MY_BEST_BLOCK" -gt 0 ]]; then
-        SYNC_PERCENTAGE=$(echo "scale=2; ($MY_BEST_BLOCK / $NETWORK_LATEST_BLOCK) * 100" | bc)
+# Convert hex to decimal safely
+hex_to_decimal() {
+    local hex_value=$1
+    if [[ $hex_value =~ ^0x[0-9a-fA-F]+$ ]]; then
+        printf "%d\n" "$hex_value"
     else
-        SYNC_PERCENTAGE="Unknown"
+        echo "N/A"
     fi
 }
 
-# Function to display the main live view
-display_status() {
-    clear
-    echo -e "\n    ${CYAN}🔵 Midnight Node  -  (Testnet)  -  ${NODE_VERSION}${RESET}"
-    echo "    ----------------------------------------------"
-    echo -e "    ${YELLOW}⏳ Uptime:${RESET} $UPTIME\t\t${BLUE}📡 Port:${RESET} 9944"
-    echo "    ----------------------------------------------"
-    echo -e "    | ${GREEN}🌍 Network Target Block:${RESET} $NETWORK_LATEST_BLOCK"
-    echo -e "    | ${GREEN}📌 My Best Block:${RESET} $MY_BEST_BLOCK"
-    echo -e "    | ${GREEN}✅ My Finalized Block:${RESET} $MY_FINALIZED_BLOCK"
-    echo -e "    | ${CYAN}📊 Sync Status:${RESET} $SYNC_PERCENTAGE%"
-    echo "    ----------------------------------------------"
-    echo -e "    | ${YELLOW}👥 Peers Connected:${RESET} $TOTAL_PEERS"
-    echo "    ----------------------------------------------"
-    echo -e "    | ${RED}🔥 CPU Usage:${RESET} $CPU_USAGE%\t"
-    echo -e "    | ${BLUE}💾 Memory:${RESET} $MEM_USAGE MB\t"
-    echo -e "    | ${CYAN}🖴 Disk Usage:${RESET} $DISK_USAGE"
-    echo "    ----------------------------------------------"
-    echo -e "    | ${GREEN}📦 Blocks Produced:${RESET} $BLOCKS_PRODUCED"
-    echo "    ----------------------------------------------"
-    echo -e "    | [q] Quit | [p] Peers List | [r] Refresh"
-}
-
-# Function to show peer list
+# Function to fetch peer list and display it properly
 show_peers() {
     clear
-    echo -e "\n    ${CYAN}🔍 Connected Peers:${RESET}"
+    echo -e "\n    🔍 Connected Peers:"
     echo "    ----------------------------------------------"
+
+    PEERS_JSON=$(docker exec -it "$CONTAINER_NAME" curl -s -X POST \
+        --data '{"jsonrpc":"2.0","method":"system_peers","params":[],"id":1}' \
+        -H "Content-Type: application/json" "$RPC_URL" 2>/dev/null)
 
     echo "$PEERS_JSON" | jq -r '
         .result[] |
-        "    🔹 ${BLUE}Peer ID:${RESET} " + .peerId + "\n" +
-        "       🔹 ${GREEN}Role:${RESET} " + .roles + "\n" +
-        "       🔹 ${YELLOW}Best Block:${RESET} " + (.bestNumber | tostring) + "\n" +
+        "    🔹 Peer ID: " + .peerId + "\n" +
+        "       🔹 Role: " + .roles + "\n" +
+        "       🔹 Best Block: " + (.bestNumber | tostring) + "\n" +
         "    ----------------------------------------------"
     '
 
     echo -e "\n    [r] Return to Main Display | [q] Quit"
 }
 
-# Start Live Updating Loop
-fetch_data
-display_status
+# Function to fetch data (optimized for performance)
+fetch_data() {
+    # Get Uptime
+    UPTIME=$(uptime -p)
 
+    # Fetch Midnight Node Version (cached to reduce calls)
+    if [[ -z "$NODE_VERSION" ]]; then
+        NODE_VERSION=$(docker exec -it "$CONTAINER_NAME" curl -s -X POST \
+            --data '{"jsonrpc":"2.0","id":1,"method":"system_version","params":[]}' \
+            -H "Content-Type: application/json" "$RPC_URL" 2>/dev/null | jq -r '.result' || echo "Unknown")
+    fi
+
+    # Fetch latest block details via RPC
+    LATEST_BLOCK_JSON=$(docker exec -it "$CONTAINER_NAME" curl -s -X POST \
+        --data '{"jsonrpc":"2.0","id":1,"method":"chain_getBlock","params":[]}' \
+        -H "Content-Type: application/json" "$RPC_URL" 2>/dev/null || echo "{}")
+
+    NETWORK_LATEST_BLOCK=$(echo "$LATEST_BLOCK_JSON" | jq -r '.result.block.header.number' 2>/dev/null || echo "0")
+    NETWORK_LATEST_BLOCK=$(hex_to_decimal "$NETWORK_LATEST_BLOCK")
+
+    # Get Finalized Block Hash
+    FINALIZED_BLOCK_HASH=$(docker exec -it "$CONTAINER_NAME" curl -s -X POST \
+        --data '{"jsonrpc":"2.0","id":1,"method":"chain_getFinalizedHead","params":[]}' \
+        -H "Content-Type: application/json" "$RPC_URL" 2>/dev/null | jq -r '.result' || echo "0x0")
+
+    # Fetch Finalized Block Details using Hash
+    FINALIZED_BLOCK_JSON=$(docker exec -it "$CONTAINER_NAME" curl -s -X POST \
+        --data '{"jsonrpc":"2.0","id":1,"method":"chain_getBlock","params":["'"$FINALIZED_BLOCK_HASH"'"]}' \
+        -H "Content-Type: application/json" "$RPC_URL" 2>/dev/null || echo "{}")
+
+    MY_FINALIZED_BLOCK=$(echo "$FINALIZED_BLOCK_JSON" | jq -r '.result.block.header.number' 2>/dev/null || echo "0")
+    MY_FINALIZED_BLOCK=$(hex_to_decimal "$MY_FINALIZED_BLOCK")
+
+    # Fetch Peer Data
+    PEERS_JSON=$(docker exec -it "$CONTAINER_NAME" curl -s -X POST \
+        --data '{"jsonrpc":"2.0","method":"system_peers","params":[],"id":1}' \
+        -H "Content-Type: application/json" "$RPC_URL" 2>/dev/null || echo "{}")
+
+    TOTAL_PEERS=$(echo "$PEERS_JSON" | jq '.result | length' 2>/dev/null || echo "0")
+   # Get Host CPU & Memory Usage (MUCH LIGHTER)
+    CPU_USAGE=$(top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4}')
+    MEM_USAGE=$(free -m | awk 'NR==2{printf "%.2f GiB", $3/1024}')
+
+    # Ensure proper spacing for disk usage
+    DISK_USAGE=$(df -h / | awk 'NR==2 {print " " $5}')
+
+    # Get Sync Percentage
+    if [[ "$NETWORK_LATEST_BLOCK" -gt 0 && "$MY_FINALIZED_BLOCK" -gt 0 ]]; then
+        SYNC_PERCENTAGE=$(echo "scale=2; ($MY_FINALIZED_BLOCK / $NETWORK_LATEST_BLOCK) * 100" | bc)
+    else
+        SYNC_PERCENTAGE="N/A"
+    fi
+
+    # Fetch Blocks Validated Using `/metrics`
+    BLOCKS_VALIDATED=$(docker exec -it "$CONTAINER_NAME" curl -s $METRICS_URL | grep substrate_proposer_block_constructed_count | awk '{print $2}')
+}
+
+# Function to display the main live view
+display_status() {
+    clear
+    echo -e "\n   ${RESET} 🔵 Midnight Node Monitor - Testnet     |   ⏳ Uptime: $UPTIME\t\t"
+    echo -e "\n    🚀 Testnet (${BLUE}Version: $NODE_VERSION${RESET})   |   📡 Port: $MIDNIGHT_PORT"
+    echo "    _____________________________________________________________________________________"
+    echo "    -------------------------------------------------------------------------------------"
+    echo -e "    | 🌍 Network Target Block: ${WHITE} $NETWORK_LATEST_BLOCK ${RESET}"
+    echo -e "    | 📌 Finalized Block: ${WHITE} $MY_FINALIZED_BLOCK ${RESET}"
+    echo -e "    | 📊 Sync Status: ${DARK_GREEN} $SYNC_PERCENTAGE% ${RESET}"
+    echo "    ---------------------------------------------------------------"
+    echo -e "    | 👥 Peers Connected: ${CYAN} $TOTAL_PEERS ${RESET}"
+    echo "    ---------------------------------------------------------------"
+    echo -e "    | 🔥 Host CPU Usage: ${YELLOW} $CPU_USAGE% ${RESET}"
+    echo -e "    | 💾 Host Memory: ${YELLOW} $MEM_USAGE ${RESET}"
+    echo -e "    | 🖴  Host Disk Usage: ${YELLOW} $DISK_USAGE ${RESET}"
+    echo "    ---------------------------------------------------------------"
+    echo -e "    | 📦 Blocks Validated: ${DARK_GREEN} $BLOCKS_VALIDATED ${RESET}"
+    echo "    _____________________________________________________________________________________"
+    echo -e "    | ${GREY}[q] Quit | [p] Peers List | [r] Refresh"
+
+}
+
+# Start loop to refresh data
 while true; do
-    # Auto-refresh every 2 seconds
-    sleep 2
     fetch_data
-    display_status &
+    display_status
+    sleep 10  # Reduce polling rate to lower CPU usage
 
-    # Read keyboard input
-    read -rsn1 -t 2 input
+    # Read user input
+    read -rsn1 -t 10 input
     if [[ "$input" == "q" ]]; then
         clear
         echo "Exiting Midnight Node Monitor..."
@@ -114,8 +153,5 @@ while true; do
         if [[ "$input" == "r" ]]; then
             display_status
         fi
-    elif [[ "$input" == "r" ]]; then
-        fetch_data
-        display_status
     fi
 done
