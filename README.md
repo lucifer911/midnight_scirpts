@@ -1,8 +1,20 @@
 # LiveView.sh
+### Idea is based on CNTool's gLiveView
+LiveView.sh is a simple script that allows users keep an eye on critical info.
+-  Node Version
+-  Server Uptime
+-  Container Start Time
+-  Node Key
+-  Port
+-  Network Blocks
+-  Node Block
+-  Peer Count
+-  Hardware Resources
+-  Produced Blocks Count
 
-LiveView.sh is a simple script that allows users to view Network Blocks, Node Block, Peer count, and hardware resources.
+  
+<img width="528" alt="Enigma_midnight" src="https://github.com/user-attachments/assets/faa3db1b-0fc9-46b9-b891-bf6b498f5b96" />
 
-<img width="514" alt="Screenshot 2025-02-06 at 3 45 38 PM" src="https://github.com/user-attachments/assets/9098174e-9526-46c8-9f74-7f1f002f443b" />
 
 
 ## Installation & Usage
@@ -14,15 +26,14 @@ wget https://raw.githubusercontent.com/lucifer911/midnight_scirpts/main/LiveView
 sudo chmod +x LiveView.sh
 ./LiveView.sh
 ```
-
-### Requirements
-- The script assumes that your container name is midnight-node-docker-midnight-node-testnet-1.
-- If your Docker container has a different name, update the LiveView.sh file accordingly.
+## User Variables
+- If you change the Docker container name and port, make sure to update the corresponding variable in the script. By default, the script assumes the container name is:
+```bash
+midnight-node-docker-midnight-node-testnet-1
+port=9944
+```
 
 ## Contributing
 Pull requests are welcome. 
-
-## License
-[Specify a license, e.g., MIT, Apache 2.0]
 
 
