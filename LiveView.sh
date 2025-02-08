@@ -82,7 +82,7 @@ fetch_data() {
     fi
 
     # Fetch Blocks Produced
-    BLOCKS_PRODUCED=$(docker exec -it "$CONTAINER_NAME" curl -s $METRICS_URL | grep substrate_proposer_block_constructed_count | awk '{print $2}')
+    BLOCKS_PRODUCED=$(docker exec "$CONTAINER_NAME" curl -s $METRICS_URL | grep substrate_proposer_block_constructed_count | awk '{print $2}')
 }
 
 # Function to display the main dashboard
