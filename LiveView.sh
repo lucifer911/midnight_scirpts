@@ -3,6 +3,7 @@
 # USER VARIABLES
 CONTAINER_NAME="midnight-node-docker-midnight-node-testnet-1"
 PORT="9944"  # Set manually if needed (Default: 9944)
+METRICS_URL="http://127.0.0.1:9615/metrics" # Set manually if needed (Default: 9615)
 
 # Auto-detect Midnight node port from logs if not set manually
 if [[ -z "$PORT" ]]; then
@@ -81,7 +82,7 @@ fetch_data() {
     fi
 
     # Fetch Blocks Produced
-    BLOCKS_PRODUCED=$(docker logs --tail 100 "$CONTAINER_NAME" 2>&1 | grep -c "Produced block")
+    BLOCKS_PRODUCED=$(docker exec -it "$CONTAINER_NAME" curl -s $METRICS_URL | grep substrate_proposer_block_constructed_count | awk '{print $2}')
 }
 
 # Function to display the main dashboard
