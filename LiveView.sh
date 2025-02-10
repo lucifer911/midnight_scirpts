@@ -4,6 +4,8 @@
 CONTAINER_NAME="midnight-node-docker-midnight-node-testnet-1"
 PORT="9944"        # Set manually if needed (Default: 9944)
 USE_DOCKER=true    # Set to false for non-Docker installations
+METRICS_URL="http://127.0.0.1:9615/metrics" # Set manually if needed (Default: 9615)
+
 
 # Auto-detect Midnight node port from logs if not set manually
 if [[ -z "$PORT" ]]; then
