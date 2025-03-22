@@ -99,7 +99,7 @@ fetch_data() {
     fi
 
     # Fetch Blocks Produced
-    BLOCKS_PRODUCED=$(docker logs --tail 100 "$CONTAINER_NAME" 2>&1 | grep -c "Produced block")
+    BLOCKS_PRODUCED=$(docker logs --tail 100 "$CONTAINER_NAME" 2>&1 | grep -c "Pre-sealed")
 }
 
 # Function to display the main dashboard
