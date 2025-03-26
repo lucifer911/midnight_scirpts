@@ -115,7 +115,7 @@ display_status(){
   echo -e "  | 🔥 CPU:              ${RED}$CPU%${RESET}"
   echo -e "  | 💾 MEM:              ${BLUE}$MEM${RESET}"
   echo -e "  | 💽 Disk:             ${CYAN}$DISK${RESET}"
-  echo -e "  | 📦 Blocks Produced:  ${BLUE}$BLOCKS_PRODUCED${RESET}"
+  echo -e "  | 📦 Blocks Produced:  ${BLUE}$BLOCKS_PRODUCED${RESET}  since Docker restart"
   echo "  |================================================================"
   echo "  | [q] Quit | [r] Refresh"
 }
