@@ -5,7 +5,7 @@ CONTAINER_NAME="midnight-node-docker-midnight-node-testnet-1"
 PORT="9944"        # Set manually if needed (Default: 9944)
 USE_DOCKER=true    # Set to false for non-Docker installations
 METRICS_URL="http://127.0.0.1:9615/metrics" # Set manually if needed (Default: 9615)
-
+MIDNIGHT_NODE_ENV_FILE="/home/midnight/midnight-node-docker/.env"
 
 # Auto-detect Midnight node port from logs if not set manually
 if [[ -z "$PORT" ]]; then
@@ -42,7 +42,7 @@ NODE_VERSION=$(execute_command curl -s -X POST \
 
 fetch_data() {
     # Get NODE_KEY from .env file
-    NODE_KEY=$(grep '^NODE_KEY=' /home/midnight/midnight-node-docker/.env | cut -d '=' -f2 | tr -d '"')
+    NODE_KEY=$(grep '^NODE_KEY=' $MIDNIGHT_NODE_ENV_FILE | cut -d '=' -f2 | tr -d '"')
 
     # Get Uptime
     UPTIME=$(uptime -p)
