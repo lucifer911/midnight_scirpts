@@ -1,7 +1,7 @@
 # LiveView.sh 
 ### Idea is based on CNTool's gLiveView
 #### tested on ( Midnight Node Monitor - Testnet - Version: 0.8.0-cab67f3b )
-LiveView.sh is a simple script that allows users keep an eye on critical info. For now it tests
+LiveView.sh (version 0.1.2) is a simple script that allows users keep an eye on critical info. For now it tests
 -  Node Version
 -  Server Uptime
 -  Container Start Time
@@ -36,6 +36,11 @@ port=9944
 ## NOTE
 Docker logs are not persisted by default. If you restart the Docker container, all previous log entries are lost. As a result, the block count resets and will only reflect blocks minted after the restart.
 
+## Troubleshoot
+Another way to check if the script is working for you is to run the following curl command. If you see metric output, the setup is likely correct. Just be sure to update the user variables if you’re not using the default settings.
+```bash
+curl -s http://127.0.0.1:9615/metrics
+```
 ## Contribut
 Pull requests are welcome. 
 
