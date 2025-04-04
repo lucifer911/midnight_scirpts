@@ -5,7 +5,6 @@ LiveView.sh (version 0.1.2) is a simple script that allows users keep an eye on 
 -  Node Version
 -  Server Uptime
 -  Container Start Time
--  Node Key
 -  Port
 -  Network Blocks
 -  Node Block
@@ -13,7 +12,7 @@ LiveView.sh (version 0.1.2) is a simple script that allows users keep an eye on 
 -  Hardware Resources
 -  Produced Blocks Count
 
- <img width="524" alt="enigma_midnight" src="https://github.com/user-attachments/assets/0832ec21-f765-47c2-a524-f78d5b4147fa" />
+<img width="557" alt="enigma" src="https://github.com/user-attachments/assets/f34d4b23-b7e9-445c-aba0-d01348fa35a6" />
 
 
 
