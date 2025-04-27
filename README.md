@@ -1,18 +1,22 @@
 # LiveView.sh 
 ### Idea is based on CNTool's gLiveView
 #### tested on ( Midnight Node Monitor - Testnet - Version: 0.8.0-cab67f3b )
-LiveView.sh (version 0.1.2) is a simple script that allows users keep an eye on critical info. For now it tests
+LiveView.sh (version 0.2) is a simple script that allows users keep an eye on critical info. For now it tests
 -  Node Version
 -  Server Uptime
 -  Container Start Time
+-  Node Key (partial/masked for security)
 -  Port
--  Network Blocks
--  Node Block
+-  Key check
+-  Registreation check (new in 0.2)
+-  Node Block (since docker restart)
+-  Epoch number (new in 0.2)
+-  Node sync
 -  Peer Count
 -  Hardware Resources
--  Produced Blocks Count
 
-<img width="557" alt="enigma" src="https://github.com/user-attachments/assets/f34d4b23-b7e9-445c-aba0-d01348fa35a6" />
+<img width="521" alt="Enigma" src="https://github.com/user-attachments/assets/9ab31dd4-e04c-4490-970a-72b635298510" />
+
 
 
 
